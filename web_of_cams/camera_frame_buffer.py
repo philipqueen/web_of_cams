@@ -14,6 +14,7 @@ class CameraFrameBuffer:
         self.frame_ready_event = Event()
         self.frame_access_sem = Semaphore(1)
         self.recording_queue = Queue()
+        self.display_queue = Queue(maxsize=3)
 
     def cleanup(self):
         self.shm.close()

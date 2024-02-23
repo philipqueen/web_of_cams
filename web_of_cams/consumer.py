@@ -1,44 +1,39 @@
-from time import perf_counter_ns
+from asyncio import QueueFull
 import numpy as np
-from pathlib import Path
-from queue import Empty
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing.synchronize import Event as MultiprocessingEvent
-from multiprocessing import Queue as MultiprocessingQueue
-from multiprocessing import shared_memory
 
 from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 
 
-def consumer(
-    camera_info: dict[str, tuple[int, int]],
-    output_folder: str | Path,
-    frame_queue: MultiprocessingQueue,
-    stop_event: MultiprocessingEvent,
-    fps: float = 30.0,
-):
-    # fourcc = cv2.VideoWriter.fourcc(*"mp4v")
+# def consumer(
+#     camera_info: dict[str, tuple[int, int]],
+#     output_folder: str | Path,
+#     frame_queue: MultiprocessingQueue,
+#     stop_event: MultiprocessingEvent,
+#     fps: float = 30.0,
+# ):
+#     # fourcc = cv2.VideoWriter.fourcc(*"mp4v")
 
-    # writers = {
-    #     cam_id: cv2.VideoWriter(
-    #         f"{Path(output_folder)}/cam_{cam_id}.mp4", fourcc, fps, frame_size
-    #     )
-    #     for cam_id, frame_size in camera_info
-    # }
+#     # writers = {
+#     #     cam_id: cv2.VideoWriter(
+#     #         f"{Path(output_folder)}/cam_{cam_id}.mp4", fourcc, fps, frame_size
+#     #     )
+#     #     for cam_id, frame_size in camera_info
+#     # }
 
-    while True:
-        try:
-            frame_bytes = frame_queue.get(timeout=1)
-            print(frame_bytes[0:10])
-        except Empty:
-            pass
+#     while True:
+#         try:
+#             frame_bytes = frame_queue.get(timeout=1)
+#             print(frame_bytes[0:10])
+#         except Empty:
+#             pass
 
-        if stop_event.is_set() and frame_queue.empty():
-            print("Stopping recording")
-            break
+#         if stop_event.is_set() and frame_queue.empty():
+#             print("Stopping recording")
+#             break
 
-    # for writer in writers.values():
-    #     writer.release()
+#     # for writer in writers.values():
+#     #     writer.release()
 
 
 def consumer_sm(
@@ -66,6 +61,10 @@ def consumer_sm(
                 timestamps[cam_buffer.cam_id].append(timestamp)
 
                 cam_buffer.recording_queue.put((frame, timestamp))
+                try:
+                    cam_buffer.display_queue.put_nowait((cam_buffer.cam_id, frame))
+                except QueueFull:
+                    pass
     
     for cam_id, timestamp_list in timestamps.items():
             if timestamp_list:
