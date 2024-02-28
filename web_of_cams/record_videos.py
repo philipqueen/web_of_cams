@@ -14,10 +14,10 @@ def record_videos(camera_buffers: list[CameraFrameBuffer], stop_event: Multiproc
         for buffer in camera_buffers:
             if not buffer.recording_queue.empty():
                 frame, timestamp = buffer.recording_queue.get(timeout=0.5)
-                print("--------printing from record_videos--------")
-                print(f"frame from: {buffer.cam_id}")
-                print(frame[0, 3, :])
-                print(timestamp)
+                # print("--------printing from record_videos--------")
+                # print(f"frame from: {buffer.cam_id}")
+                # print(frame[0, 3, :])
+                # print(timestamp)
                 frame_length_dict[buffer.cam_id] += 1
             else:
                 empty_queues += 1

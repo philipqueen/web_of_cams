@@ -1,15 +1,10 @@
-import multiprocessing
-import time
-
-from multiprocessing import Event, Process
+from multiprocessing import Process
 from multiprocessing.synchronize import Event as MultiprocessingEvent
 
-import numpy as np
 from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 
-from web_of_cams.detect_cameras import detect_cameras
 from web_of_cams.record_videos import record_videos
-from web_of_cams.run_camera import run_camera, run_camera_sm
+from web_of_cams.run_camera import run_camera_sm
 from web_of_cams.consumer import consumer_sm
 
 
@@ -90,6 +85,7 @@ def shutdown_processes(
     camera_buffers: list[CameraFrameBuffer],
     stop_event: MultiprocessingEvent,
 ):
+    print("setting stop event")
     stop_event.set()
 
     for process in processes:

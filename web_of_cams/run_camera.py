@@ -6,22 +6,22 @@ from multiprocessing import Queue as MultiprocessingQueue
 from multiprocessing import shared_memory, Process, Event, Semaphore
 
 
-def run_camera(
-    cam_id: int,
-    frame_queue: MultiprocessingQueue,
-    stop_event: MultiprocessingEvent,
-    fps: float = 30.0,
-):
-    cap = cv2.VideoCapture(cam_id)
-    cap.set(cv2.CAP_PROP_FPS, fps)
-    while not stop_event.is_set():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        frame_bytes = frame.tobytes()
-        frame_queue.put(frame_bytes)
+# def run_camera(
+#     cam_id: int,
+#     frame_queue: MultiprocessingQueue,
+#     stop_event: MultiprocessingEvent,
+#     fps: float = 30.0,
+# ):
+#     cap = cv2.VideoCapture(cam_id)
+#     cap.set(cv2.CAP_PROP_FPS, fps)
+#     while not stop_event.is_set():
+#         ret, frame = cap.read()
+#         if not ret:
+#             break
+#         frame_bytes = frame.tobytes()
+#         frame_queue.put(frame_bytes)
 
-    cap.release()
+#     cap.release()
 
 def run_camera_sm(cam_id, frame_ready_event, frame_access_sem, shm_name, frame_size, timestamp_mem_name, stop_event):
     cap = cv2.VideoCapture(cam_id)
@@ -41,15 +41,14 @@ def run_camera_sm(cam_id, frame_ready_event, frame_access_sem, shm_name, frame_s
             np.copyto(timestamp, perf_counter_ns())
             frame_access_sem.release()
             frame_ready_event.set()
-            print("--------printing from run_camera_sm--------")
-            print(f"original frame from: {cam_id}")
-            print(frame[0, 3, :])
-            print(f"shape of frame: {frame.shape}")
+            # print("--------printing from run_camera_sm--------")
+            # print(f"original frame from: {cam_id}")
+            # print(frame[0, 3, :])
+            # print(f"shape of frame: {frame.shape}")
         else:
             print(f"failed to read frame from {cam_id}")
 
-
-
+    print(f"shutting down camera {cam_id}")
     cap.release()
     shm.close()
     timestamp_mem.close()

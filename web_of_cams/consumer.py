@@ -60,12 +60,13 @@ def consumer_sm(
                 print(f"shape of frame: {frame.shape}")
                 timestamps[cam_buffer.cam_id].append(timestamp)
 
-                cam_buffer.recording_queue.put_nowait((frame, timestamp))
+                cam_buffer.recording_queue.put((frame, timestamp)) # TODO: might want put_nowait here, but need to decid ehow to handle queue full exceptions (or figure out how to prevent them)
                 try:
                     cam_buffer.display_queue.put_nowait((cam_buffer.cam_id, frame))
-                except QueueFull:
+                except: # TODO: figure out the exception here (QueueFull doesn't work?) 
                     pass
     
+    print("stop event set, printing camera latencies")
     for cam_id, timestamp_list in timestamps.items():
             if timestamp_list:
                 # calculate average difference between consecutive timestamps

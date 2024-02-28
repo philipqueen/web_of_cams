@@ -11,7 +11,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Web of Cams')
         self.setGeometry(100, 100, 800, 600)
         self.createDisplayWidget()
-
         self.show()
 
     def createDisplayWidget(self):
