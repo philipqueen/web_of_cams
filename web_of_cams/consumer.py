@@ -60,7 +60,7 @@ def consumer_sm(
                 print(f"shape of frame: {frame.shape}")
                 timestamps[cam_buffer.cam_id].append(timestamp)
 
-                cam_buffer.recording_queue.put((frame, timestamp))
+                cam_buffer.recording_queue.put_nowait((frame, timestamp))
                 try:
                     cam_buffer.display_queue.put_nowait((cam_buffer.cam_id, frame))
                 except QueueFull:
