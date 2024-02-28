@@ -49,7 +49,7 @@ from web_of_cams.consumer import consumer_sm
 
 def camera_process_handler_sm(
     camera_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent
-):
+) -> list[Process]:
     processes = []
 
     for buffer in camera_buffers:
@@ -82,11 +82,18 @@ def camera_process_handler_sm(
     recording_process.start()
     processes.append(recording_process)
 
-    time.sleep(2)
+    return processes
+
+
+def shutdown_processes(
+    processes: list[Process],
+    camera_buffers: list[CameraFrameBuffer],
+    stop_event: MultiprocessingEvent,
+):
     stop_event.set()
 
     for process in processes:
-        process.join()
+        process.terminate()
 
     for buffer in camera_buffers:
         buffer.cleanup()
