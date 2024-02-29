@@ -1,4 +1,4 @@
-from asyncio import QueueFull
+from queue import Full
 import numpy as np
 from multiprocessing.synchronize import Event as MultiprocessingEvent
 
@@ -60,18 +60,26 @@ def consumer_sm(
                 print(f"shape of frame: {frame.shape}")
                 timestamps[cam_buffer.cam_id].append(timestamp)
 
-                cam_buffer.recording_queue.put((frame, timestamp)) # TODO: might want put_nowait here, but need to decid ehow to handle queue full exceptions (or figure out how to prevent them)
+                cam_buffer.recording_queue.put((frame, timestamp)) # don't use put_nowait here, because we definitely want to record these frames
                 try:
                     cam_buffer.display_queue.put_nowait((cam_buffer.cam_id, frame))
-                except: # TODO: figure out the exception here (QueueFull doesn't work?) 
+                except Full:
                     pass
-    
-    print("stop event set, printing camera latencies")
+
+    # we need the display queue to be empty in order for the process to join, and don't care if the last frames aren't displayed
+    # we need the recording queue to empty itself though, as we can't miss recording frames
+    for cam_buffer in camera_frame_buffers:
+        cam_buffer.display_queue.close()
+        cam_buffer.display_queue.cancel_join_thread()
+
     for cam_id, timestamp_list in timestamps.items():
             if timestamp_list:
                 # calculate average difference between consecutive timestamps
                 average_latency = np.mean(np.diff(np.array(timestamp_list))) / 1e9
                 print(f"Average latency for camera {cam_id}: {average_latency}")
+                print(f"Average fps for camera {cam_id}: {1 / average_latency:.2f}")
+
+    print("----consumer_sm done----")
 
 
 # Thread Pool Executor doesn't seem to be any faster for two cameras
