@@ -45,7 +45,7 @@ from web_of_cams.consumer import consumer_sm
 def camera_process_handler_sm(
     camera_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent
 ) -> list[Process]:
-    processes = []
+    processes = [] # the order of the processes DOES matter here - we want to join cameras first, consumer second, recorder last - i.e. don't make this a dict
 
     for buffer in camera_buffers:
         p = Process(
@@ -88,8 +88,12 @@ def shutdown_processes(
     print("setting stop event")
     stop_event.set()
 
+    print(f"shutting down processes: {[process.pid for process in processes]}")
     for process in processes:
-        process.terminate()
+        process.join()
+        print(f"Process {process.pid} joined")
+    print("finished shutting down processes")
 
+    print("cleaning up camera buffers")
     for buffer in camera_buffers:
         buffer.cleanup()

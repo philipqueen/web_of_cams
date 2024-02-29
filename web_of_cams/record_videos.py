@@ -6,6 +6,11 @@ from queue import Queue
 from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 
 def record_videos(camera_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent):
+    """
+    Right now doesn't do two important things:
+    1. Record the videos
+    2. make sure videos are synchronized.
+    """
     frame_length_dict = {
         buffer.cam_id: 0 for buffer in camera_buffers
     }
@@ -28,6 +33,6 @@ def record_videos(camera_buffers: list[CameraFrameBuffer], stop_event: Multiproc
                 print(f"frames from {cam_id}: {frame_length}")
             break
 
-    print("out of the while loop")
+    print("----record_videos done----")
 
 
