@@ -62,7 +62,7 @@ def consumer_sm(
 
                 cam_buffer.recording_queue.put((frame, timestamp)) # don't use put_nowait here, because we definitely want to record these frames
                 try:
-                    cam_buffer.display_queue.put_nowait((cam_buffer.cam_id, frame))
+                    cam_buffer.display_queue.put_nowait(frame)
                 except Full:
                     pass
 

@@ -71,7 +71,7 @@ class DisplayWidget(QWidget):
     def update_frames(self):
         for display in self.cam_displays.values():
             if not display["buffer"].display_queue.empty():
-                cam_id, frame = display["buffer"].display_queue.get()
+                frame = display["buffer"].display_queue.get()
                 image = QImage(
                     frame.data,
                     frame.shape[1],
