@@ -1,5 +1,5 @@
 import time
-from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton
+from PySide6.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtCore import Qt, QTimer
 from multiprocessing import Event
@@ -18,10 +18,18 @@ class DisplayWidget(QWidget):
 
         self.fetch_frames = False
 
-        self._layout = QVBoxLayout()
+        self._layout = QGridLayout()
 
         self.cam_displays = {}
 
+        if len(self.cam_buffers) < 3:
+            columns = 1
+        elif len(self.cam_buffers) < 7:
+            columns = 2
+        else:
+            columns = 3
+
+        row, col = 0, 0
         for buffer in self.cam_buffers:
             cam_display = {
                 "display_widget": QLabel(self),
@@ -33,11 +41,16 @@ class DisplayWidget(QWidget):
 
             cam_display["cam_id"].setText(buffer.cam_id)
 
-            self._layout.addWidget(cam_display["display_widget"])
-            self._layout.addWidget(cam_display["cam_id"])
+            self._layout.addWidget(cam_display["display_widget"], row, col)
+            self._layout.addWidget(cam_display["cam_id"], row + 1, col)
 
-        self.max_image_height = super().size().height() // 3
-        self.max_image_width = int(super().size().width())
+            col += 1
+            if col == columns:
+                col = 0
+                row += 2
+
+        self.max_image_height = super().size().height() * columns // len(self.cam_buffers)
+        self.max_image_width = int(super().size().width() // columns)
 
         self.start_button = QPushButton("Start", self)
         self.start_button.clicked.connect(self.start_processes)
