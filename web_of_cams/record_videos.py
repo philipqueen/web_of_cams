@@ -16,7 +16,7 @@ def record_videos(
     video_writers = {}
     for buffer in camera_buffers:
         writer = cv2.VideoWriter(
-            f"{datetime_text}_{buffer.cam_id}.mp4",
+            f"{datetime_text}_cam_{buffer.cam_id}.mp4",
             cv2.VideoWriter.fourcc(*"mp4v"),
             30,
             (buffer.frame_shape[1], buffer.frame_shape[0]),
@@ -63,6 +63,8 @@ def record_videos(
             for cam_id, writer in video_writers.items():
                 print(f"video {cam_id} has {video_framecounts[cam_id]} frames")
                 writer.release()
+            for cam_id, timestamp_list in timestamp_lists.items():
+                np.save(f"{datetime_text}_cam_{cam_id}_timestamps.npy", np.array(timestamp_list))
             break
 
     print("----record_videos done----")
