@@ -56,7 +56,7 @@ def record_videos(
                 else:
                     video_writers[cam_id].write(blank_frames[cam_id])
                     video_framecounts[cam_id] += 1
-                    timestamp_lists[cam_id].append(0)
+                    timestamp_lists[cam_id].append(min_timestamp)  # TODO: figure out how to handle timestamp for blank frames
 
         if empty_queues > 0 and stop_event.is_set():
             print(f"stopping recording")
@@ -65,6 +65,9 @@ def record_videos(
                 writer.release()
             for cam_id, timestamp_list in timestamp_lists.items():
                 np.save(f"{datetime_text}_cam_{cam_id}_timestamps.npy", np.array(timestamp_list))
+                average_latency = np.nanmean(np.diff(np.array(timestamp_list))) / 1e9
+                print(f"Average latency for camera {cam_id}: {average_latency}")
+                print(f"Average fps for camera {cam_id}: {1 / average_latency:.2f}")
             break
 
     print("----record_videos done----")
