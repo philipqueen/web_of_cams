@@ -23,10 +23,10 @@ def consumer_sm(
                 ).copy()[0]
                 cam_buffer.frame_access_sem.release()
                 cam_buffer.frame_ready_event.clear()
-                print("--------printing from consumer_sm--------")
-                print(f"frame from: {cam_buffer.cam_id}")
-                print(frame[0, 3, :])
-                print(f"shape of frame: {frame.shape}")
+                # print("--------printing from consumer_sm--------")
+                # print(f"frame from: {cam_buffer.cam_id}")
+                # print(frame[0, 3, :])
+                # print(f"shape of frame: {frame.shape}")
                 timestamps[cam_buffer.cam_id].append(timestamp)
 
                 cam_buffer.recording_queue.put((frame, timestamp)) # don't use put_nowait here, because we definitely want to record these frames
@@ -49,53 +49,3 @@ def consumer_sm(
                 print(f"Average fps for camera {cam_id}: {1 / average_latency:.2f}")
 
     print("----consumer_sm done----")
-
-
-# Thread Pool Executor doesn't seem to be any faster for two cameras
-
-# def process_frame(cam_buffer: CameraFrameBuffer) -> tuple[np.ndarray, float] | None:
-#     if cam_buffer.frame_ready_event.wait(1):
-#         cam_buffer.frame_access_sem.acquire()
-#         frame = np.ndarray(
-#             (cam_buffer.frame_shape[0], cam_buffer.frame_shape[1], 3),
-#             dtype=cam_buffer.dtype,
-#             buffer=cam_buffer.shm.buf,
-#         ).copy()
-#         timestamp = np.ndarray(
-#             (1,), dtype=np.float64, buffer=cam_buffer.timestamp_mem.buf,
-#         ).copy()[0]
-#         cam_buffer.frame_access_sem.release()
-#         cam_buffer.frame_ready_event.clear()
-#         return(frame, timestamp)
-
-
-# def consumer_sm(camera_frame_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent):
-#     timestamps = {cam_buffer.cam_id: [] for cam_buffer in camera_frame_buffers}
-
-#     with ThreadPoolExecutor(max_workers=len(camera_frame_buffers)) as executor:
-#         while not stop_event.is_set():
-#             # Submit the processing tasks for all cameras to the executor
-#             future_to_cam_buffer = {executor.submit(process_frame, cam_buffer): cam_buffer for cam_buffer in camera_frame_buffers}
-
-#             # Iterate over completed tasks
-#             for future in as_completed(future_to_cam_buffer):
-#                 cam_buffer = future_to_cam_buffer[future]
-#                 try:
-#                     data = future.result()  # Get the result of the processing
-#                     if data:
-#                         frame, timestamp = data
-
-#                         print("--------printing from video_recorder_sm--------")
-#                         print(f"frame from: {cam_buffer.cam_id}")
-#                         print(frame[0, 3, :])
-#                         print(f"shape of frame: {frame.shape}")
-#                         timestamps[cam_buffer.cam_id].append(timestamp)
-
-#                 except Exception as exc:
-#                     print(f'Camera {cam_buffer.cam_id} generated an exception: {exc}')
-
-#         for cam_id, timestamp_list in timestamps.items():
-#             if timestamp_list:
-#                 # calculate average difference between consecutive timestamps
-#                 average_latency = np.mean(np.diff(np.array(timestamp_list))) / 1e9
-#                 print(f"Average latency for camera {cam_id}: {average_latency}")

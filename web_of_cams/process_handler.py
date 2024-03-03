@@ -8,40 +8,6 @@ from web_of_cams.run_camera import run_camera_sm
 from web_of_cams.consumer import consumer_sm
 
 
-# def camera_process_handler():
-#     webcam_info = (
-#         detect_cameras()
-#     )  # TODO: Some way to decide which cameras run, other camera parameters
-#     stop_event = multiprocessing.Event()
-#     recording_queue = multiprocessing.Queue()
-#     processes = []
-#     recorder = multiprocessing.Process(
-#         target=consumer,
-#         args=(
-#             webcam_info,
-#             "output",
-#             recording_queue,
-#             stop_event,
-#             30.0,
-#         ),
-#     )
-#     recorder.start()
-#     processes.append(recorder)
-
-#     for webcam_id in webcam_info.keys():
-#         p = multiprocessing.Process(
-#             target=run_camera, args=(int(webcam_id), recording_queue, stop_event)
-#         )
-#         p.start()
-#         processes.append(p)
-
-#     time.sleep(3)
-#     stop_event.set()
-
-#     for process in processes:
-#         process.join()
-
-
 def camera_process_handler_sm(
     camera_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent
 ) -> list[Process]:
