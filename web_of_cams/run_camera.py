@@ -6,23 +6,6 @@ from multiprocessing import Queue as MultiprocessingQueue
 from multiprocessing import shared_memory, Process, Event, Semaphore
 
 
-# def run_camera(
-#     cam_id: int,
-#     frame_queue: MultiprocessingQueue,
-#     stop_event: MultiprocessingEvent,
-#     fps: float = 30.0,
-# ):
-#     cap = cv2.VideoCapture(cam_id)
-#     cap.set(cv2.CAP_PROP_FPS, fps)
-#     while not stop_event.is_set():
-#         ret, frame = cap.read()
-#         if not ret:
-#             break
-#         frame_bytes = frame.tobytes()
-#         frame_queue.put(frame_bytes)
-
-#     cap.release()
-
 def run_camera_sm(cam_id, frame_ready_event, frame_access_sem, shm_name, frame_size, timestamp_mem_name, stop_event):
     cap = cv2.VideoCapture(cam_id)
     shm = shared_memory.SharedMemory(name=shm_name)

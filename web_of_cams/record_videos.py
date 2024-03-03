@@ -1,7 +1,4 @@
-import cv2
-from multiprocessing import Queue as MultiprocessingQueue
 from multiprocessing.synchronize import Event as MultiprocessingEvent
-from queue import Queue
 
 from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 

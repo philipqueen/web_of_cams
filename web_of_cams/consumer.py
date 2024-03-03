@@ -5,37 +5,6 @@ from multiprocessing.synchronize import Event as MultiprocessingEvent
 from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 
 
-# def consumer(
-#     camera_info: dict[str, tuple[int, int]],
-#     output_folder: str | Path,
-#     frame_queue: MultiprocessingQueue,
-#     stop_event: MultiprocessingEvent,
-#     fps: float = 30.0,
-# ):
-#     # fourcc = cv2.VideoWriter.fourcc(*"mp4v")
-
-#     # writers = {
-#     #     cam_id: cv2.VideoWriter(
-#     #         f"{Path(output_folder)}/cam_{cam_id}.mp4", fourcc, fps, frame_size
-#     #     )
-#     #     for cam_id, frame_size in camera_info
-#     # }
-
-#     while True:
-#         try:
-#             frame_bytes = frame_queue.get(timeout=1)
-#             print(frame_bytes[0:10])
-#         except Empty:
-#             pass
-
-#         if stop_event.is_set() and frame_queue.empty():
-#             print("Stopping recording")
-#             break
-
-#     # for writer in writers.values():
-#     #     writer.release()
-
-
 def consumer_sm(
     camera_frame_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent
 ):
