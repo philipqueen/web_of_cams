@@ -14,9 +14,8 @@ class MainWindow(QMainWindow):
         self.show()
 
     def createDisplayWidget(self):
-        cam_buffers = setup_cameras()
-        fps = 30
-        self.display_widget = DisplayWidget(cam_buffers=cam_buffers, fps=fps)
+        cam_buffers = setup_cameras(30)
+        self.display_widget = DisplayWidget(cam_buffers=cam_buffers)
         self.setCentralWidget(self.display_widget)
 
 if __name__ == "__main__":
