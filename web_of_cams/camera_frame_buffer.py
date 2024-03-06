@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 
 from multiprocessing import shared_memory, Event, Semaphore, Queue
@@ -14,8 +15,9 @@ class CameraFrameBuffer:
         self.timestamp_mem = shared_memory.SharedMemory(create=True, size=np.dtype(np.float64).itemsize)
         self.frame_ready_event = Event()
         self.frame_access_sem = Semaphore(1)
-        self.recording_queue = Queue()
-        self.display_queue = Queue(maxsize=3) # TODO: we might not need each camera to have its own display queue
+        self.recording_queue: Queue = Queue()
+        self.display_queue: Optional[Queue] = None # TODO: we might not need each camera to have its own display queue
+        self.outbound_queue: Optional[Queue] = None
 
     def cleanup(self):
         self.shm.close()

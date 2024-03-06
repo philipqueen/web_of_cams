@@ -31,8 +31,8 @@ def main():
     )
 
     time.sleep(2)
-    # recording_event.set()
-    # time.sleep(2)
+    recording_event.set()
+    time.sleep(2)
     shutdown_processes(processes, camera_buffers, stop_event, recording_event)
 
 

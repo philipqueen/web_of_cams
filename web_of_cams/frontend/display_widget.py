@@ -1,8 +1,7 @@
-import time
 from PySide6.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtCore import Qt, QTimer
-from multiprocessing import Event
+from multiprocessing import Event, Queue
 
 from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 from web_of_cams.process_handler import camera_process_handler_sm, shutdown_processes
@@ -74,6 +73,8 @@ class DisplayWidget(QWidget):
         self.setLayout(self._layout)
 
     def start_processes(self):
+        for buffer in self.cam_buffers:
+            buffer.display_queue = Queue(maxsize=3)
         self.processes = camera_process_handler_sm(self.cam_buffers, self.stop_event, self.recording_event)
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)

@@ -34,15 +34,25 @@ def consumer_sm(
                     cam_buffer.recording_queue.put(
                         (frame, timestamp)
                     )  # don't use put_nowait here, because we definitely want to record these frames
-                try:
-                    cam_buffer.display_queue.put_nowait(frame)
-                except Full:
-                    pass
+                if cam_buffer.display_queue:
+                    try:
+                        cam_buffer.display_queue.put_nowait(frame)
+                    except Full:
+                        pass
+                if cam_buffer.outbound_queue:
+                    try:
+                        cam_buffer.outbound_queue.put_nowait((frame, timestamp))
+                    except Full:
+                        pass
 
     # we need the display queue to be empty in order for the process to join, and don't care if the last frames aren't displayed
     # we need the recording queue to empty itself though, as we can't miss recording frames
     for cam_buffer in camera_frame_buffers:
-        cam_buffer.display_queue.close()
-        cam_buffer.display_queue.cancel_join_thread()
+        if cam_buffer.display_queue:
+            cam_buffer.display_queue.close()
+            cam_buffer.display_queue.cancel_join_thread()
+        if cam_buffer.outbound_queue:
+            cam_buffer.outbound_queue.close()
+            cam_buffer.outbound_queue.cancel_join_thread()
 
     print("----consumer_sm done----")
