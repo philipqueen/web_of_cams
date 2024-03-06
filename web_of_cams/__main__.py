@@ -23,7 +23,9 @@ def main():
 
     camera_buffers = setup_cameras()
 
-    processes = camera_process_handler_sm(camera_buffers, stop_event)
+    fps = 30
+
+    processes = camera_process_handler_sm(camera_buffers, fps, stop_event)
 
     time.sleep(2)
     shutdown_processes(processes, camera_buffers, stop_event)

@@ -9,7 +9,7 @@ from web_of_cams.consumer import consumer_sm
 
 
 def camera_process_handler_sm(
-    camera_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent
+    camera_buffers: list[CameraFrameBuffer], fps: float, stop_event: MultiprocessingEvent
 ) -> list[Process]:
     processes = [] # the order of the processes DOES matter here - we want to join cameras first, consumer second, recorder last - i.e. don't make this a dict
 
@@ -18,6 +18,7 @@ def camera_process_handler_sm(
             target=run_camera_sm,
             args=(
                 int(buffer.cam_id),
+                fps,
                 buffer.frame_ready_event,
                 buffer.frame_access_sem,
                 buffer.shm.name,
@@ -38,7 +39,7 @@ def camera_process_handler_sm(
 
     recording_process = Process(
         target=record_videos,
-        args=(camera_buffers, stop_event),
+        args=(camera_buffers, fps, stop_event),
     )
     recording_process.start()
     processes.append(recording_process)

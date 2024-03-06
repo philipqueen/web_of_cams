@@ -4,7 +4,7 @@ from multiprocessing import shared_memory, Event, Semaphore, Queue
 
 
 class CameraFrameBuffer:
-    def __init__(self, cam_id, frame_shape):
+    def __init__(self, cam_id: str, frame_shape: tuple):
         self.cam_id = cam_id
         self.frame_shape = frame_shape
         self.dtype = np.uint8

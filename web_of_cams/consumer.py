@@ -23,10 +23,6 @@ def consumer_sm(
                 ).copy()[0]
                 cam_buffer.frame_access_sem.release()
                 cam_buffer.frame_ready_event.clear()
-                # print("--------printing from consumer_sm--------")
-                # print(f"frame from: {cam_buffer.cam_id}")
-                # print(frame[0, 3, :])
-                # print(f"shape of frame: {frame.shape}")
                 timestamps[cam_buffer.cam_id].append(timestamp)
 
                 cam_buffer.recording_queue.put((frame, timestamp)) # don't use put_nowait here, because we definitely want to record these frames
@@ -40,12 +36,5 @@ def consumer_sm(
     for cam_buffer in camera_frame_buffers:
         cam_buffer.display_queue.close()
         cam_buffer.display_queue.cancel_join_thread()
-
-    for cam_id, timestamp_list in timestamps.items():
-            if timestamp_list:
-                # calculate average difference between consecutive timestamps
-                average_latency = np.mean(np.diff(np.array(timestamp_list))) / 1e9
-                print(f"Average latency for camera {cam_id}: {average_latency}")
-                print(f"Average fps for camera {cam_id}: {1 / average_latency:.2f}")
 
     print("----consumer_sm done----")

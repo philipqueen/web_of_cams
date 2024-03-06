@@ -9,12 +9,13 @@ from web_of_cams.process_handler import camera_process_handler_sm, shutdown_proc
 
 
 class DisplayWidget(QWidget):
-    def __init__(self, cam_buffers: list[CameraFrameBuffer]):
+    def __init__(self, cam_buffers: list[CameraFrameBuffer], fps: float):
         super().__init__()
 
         self.stop_event = Event()
 
         self.cam_buffers = cam_buffers
+        self.fps = fps
 
         self.fetch_frames = False
 
@@ -65,7 +66,7 @@ class DisplayWidget(QWidget):
         self.setLayout(self._layout)
 
     def start_processes(self):
-        self.processes = camera_process_handler_sm(self.cam_buffers, self.stop_event)
+        self.processes = camera_process_handler_sm(self.cam_buffers, self.fps, self.stop_event)
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)
 

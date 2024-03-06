@@ -9,7 +9,7 @@ from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 
 
 def record_videos(
-    camera_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent
+    camera_buffers: list[CameraFrameBuffer], fps, stop_event: MultiprocessingEvent
 ):
     video_framecounts = {buffer.cam_id: 0 for buffer in camera_buffers}
     datetime_text = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
@@ -30,7 +30,7 @@ def record_videos(
     }
 
     frame_buffers = {buffer.cam_id: None for buffer in camera_buffers}
-
+ 
     cutoff = 33333333  # TODO: replace this with gap between frames in video fps, in nanoseconds
 
     while True:
