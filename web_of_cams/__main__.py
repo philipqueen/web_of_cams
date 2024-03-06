@@ -20,13 +20,20 @@ def setup_cameras(fps: float) -> list[CameraFrameBuffer]:
 
 def main():
     stop_event = Event()
+    recording_event = Event()
 
     camera_buffers = setup_cameras(fps=30)
 
-    processes = camera_process_handler_sm(camera_buffers, stop_event)
+    processes = camera_process_handler_sm(
+        camera_buffers=camera_buffers,
+        stop_event=stop_event,
+        recording_event=recording_event,
+    )
 
     time.sleep(2)
-    shutdown_processes(processes, camera_buffers, stop_event)
+    # recording_event.set()
+    # time.sleep(2)
+    shutdown_processes(processes, camera_buffers, stop_event, recording_event)
 
 
 if __name__ == "__main__":

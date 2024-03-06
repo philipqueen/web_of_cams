@@ -13,6 +13,7 @@ class DisplayWidget(QWidget):
         super().__init__()
 
         self.stop_event = Event()
+        self.recording_event = Event()
 
         self.cam_buffers = cam_buffers
 
@@ -52,20 +53,28 @@ class DisplayWidget(QWidget):
         self.max_image_height = super().size().height() * columns // len(self.cam_buffers)
         self.max_image_width = int(super().size().width() // columns)
 
-        self.start_button = QPushButton("Start", self)
+        self.start_button = QPushButton("Start Cameras", self)
         self.start_button.clicked.connect(self.start_processes)
 
-        self.stop_button = QPushButton("Stop", self)
+        self.stop_button = QPushButton("Stop Cameras", self)
         self.stop_button.clicked.connect(self.stop_processes)
         self.stop_button.setEnabled(False)
 
+        self.record_button = QPushButton("Record", self)
+        self.record_button.clicked.connect(self.start_recording)
+        self.stop_recording_button = QPushButton("Stop Recording", self)
+        self.stop_recording_button.clicked.connect(self.stop_recording)
+        self.stop_recording_button.setEnabled(False)
+
         self._layout.addWidget(self.start_button)
         self._layout.addWidget(self.stop_button)
+        self._layout.addWidget(self.record_button)
+        self._layout.addWidget(self.stop_recording_button)
 
         self.setLayout(self._layout)
 
     def start_processes(self):
-        self.processes = camera_process_handler_sm(self.cam_buffers, self.stop_event)
+        self.processes = camera_process_handler_sm(self.cam_buffers, self.stop_event, self.recording_event)
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)
 
@@ -80,6 +89,16 @@ class DisplayWidget(QWidget):
         shutdown_processes(self.processes, self.cam_buffers, self.stop_event)
         self.stop_button.setEnabled(False)
         print("finished stopping processes")
+
+    def start_recording(self):
+        self.recording_event.set()
+        self.record_button.setEnabled(False)
+        self.stop_recording_button.setEnabled(True)
+
+    def stop_recording(self):
+        self.recording_event.clear()
+        self.stop_recording_button.setEnabled(False)
+        self.record_button.setEnabled(True)
 
     def update_frames(self):
         for display in self.cam_displays.values():

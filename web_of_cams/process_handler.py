@@ -1,5 +1,6 @@
 from multiprocessing import Process
 from multiprocessing.synchronize import Event as MultiprocessingEvent
+from typing import Optional
 
 from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 
@@ -9,9 +10,13 @@ from web_of_cams.consumer import consumer_sm
 
 
 def camera_process_handler_sm(
-    camera_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent
+    camera_buffers: list[CameraFrameBuffer],
+    stop_event: MultiprocessingEvent,
+    recording_event: Optional[MultiprocessingEvent] = None,
 ) -> list[Process]:
-    processes = [] # the order of the processes DOES matter here - we want to join cameras first, consumer second, recorder last - i.e. don't make this a dict
+    processes = (
+        []
+    )  # the order of the processes DOES matter here - we want to join cameras first, consumer second, recorder last - i.e. don't make this a dict
 
     for buffer in camera_buffers:
         p = Process(
@@ -32,14 +37,14 @@ def camera_process_handler_sm(
 
     consumer_process = Process(
         target=consumer_sm,
-        args=(camera_buffers, stop_event),
+        args=(camera_buffers, stop_event, recording_event),
     )
     consumer_process.start()
     processes.append(consumer_process)
 
     recording_process = Process(
         target=record_videos,
-        args=(camera_buffers, stop_event),
+        args=(camera_buffers, stop_event, recording_event),
     )
     recording_process.start()
     processes.append(recording_process)
@@ -51,9 +56,13 @@ def shutdown_processes(
     processes: list[Process],
     camera_buffers: list[CameraFrameBuffer],
     stop_event: MultiprocessingEvent,
+    recording_event: Optional[MultiprocessingEvent] = None,
 ):
     print("setting stop event")
     stop_event.set()
+
+    if recording_event is not None:
+        recording_event.clear()
 
     print(f"shutting down processes: {[process.pid for process in processes]}")
     for process in processes:

@@ -1,4 +1,5 @@
 from queue import Full
+from typing import Optional
 import numpy as np
 from multiprocessing.synchronize import Event as MultiprocessingEvent
 
@@ -6,7 +7,9 @@ from web_of_cams.camera_frame_buffer import CameraFrameBuffer
 
 
 def consumer_sm(
-    camera_frame_buffers: list[CameraFrameBuffer], stop_event: MultiprocessingEvent
+    camera_frame_buffers: list[CameraFrameBuffer],
+    stop_event: MultiprocessingEvent,
+    recording_event: Optional[MultiprocessingEvent] = None,
 ):
     timestamps = {cam_buffer.cam_id: [] for cam_buffer in camera_frame_buffers}
     while not stop_event.is_set():
@@ -19,13 +22,18 @@ def consumer_sm(
                     buffer=cam_buffer.shm.buf,
                 ).copy()
                 timestamp = np.ndarray(
-                    (1,), dtype=np.float64, buffer=cam_buffer.timestamp_mem.buf,
+                    (1,),
+                    dtype=np.float64,
+                    buffer=cam_buffer.timestamp_mem.buf,
                 ).copy()[0]
                 cam_buffer.frame_access_sem.release()
                 cam_buffer.frame_ready_event.clear()
                 timestamps[cam_buffer.cam_id].append(timestamp)
 
-                cam_buffer.recording_queue.put((frame, timestamp)) # don't use put_nowait here, because we definitely want to record these frames
+                if recording_event is not None and recording_event.is_set():
+                    cam_buffer.recording_queue.put(
+                        (frame, timestamp)
+                    )  # don't use put_nowait here, because we definitely want to record these frames
                 try:
                     cam_buffer.display_queue.put_nowait(frame)
                 except Full:
